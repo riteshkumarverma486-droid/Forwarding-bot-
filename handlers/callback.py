@@ -1,9 +1,18 @@
-from pyrogram import Client, filters
-from utils.force_join import is_joined_all
+from database import add_force_channel, remove_force_channel, get_force_channels
 
-@Client.on_callback_query(filters.regex("verify_join"))
-async def verify(client, q):
-    if await is_joined_all(client, q.from_user.id):
-        await q.message.edit("✅ Verified! Ab search karo 🔍")
-    else:
-        await q.answer("❌ Pehle sab channels join karo", show_alert=True)
+@Client.on_callback_query()
+async def cb_handler(client, query):
+    data = query.data
+
+    if data == "add_fc":
+        await query.message.reply("Send channel username (without @)")
+    
+    elif data == "remove_fc":
+        await query.message.reply("Send channel username to remove")
+
+    elif data == "list_fc":
+        channels = get_force_channels()
+        text = "📂 Force Channels:\n\n"
+        for ch in channels:
+            text += f"@{ch}\n"
+        await query.message.reply(text)
