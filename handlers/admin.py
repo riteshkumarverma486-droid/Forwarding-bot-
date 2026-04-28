@@ -1,6 +1,9 @@
 from pyrogram import Client, filters
 from config import ADMINS
-from db import conn, cur
+import sqlite3
+
+conn = sqlite3.connect("bot.db", check_same_thread=False)
+cur = conn.cursor()
 
 def is_admin(uid): return uid in ADMINS
 
