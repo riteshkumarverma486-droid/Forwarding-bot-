@@ -1,5 +1,5 @@
 from database import add_force_channel, remove_force_channel, get_force_channels
-
+from pyrogram import Client, filters
 @Client.on_callback_query()
 async def cb_handler(client, query):
     data = query.data
