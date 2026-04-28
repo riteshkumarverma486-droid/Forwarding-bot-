@@ -1,11 +1,9 @@
 from pyrogram import Client, filters
-from utils.force_join import check_join
+from utils.force_join import is_joined_all
 
 @Client.on_callback_query(filters.regex("verify_join"))
-async def verify_join(client, query):
-    user_id = query.from_user.id
-
-    if await check_join(client, user_id):
-        await query.message.edit("✅ Verified! Now send your search again 🔍")
+async def verify(client, q):
+    if await is_joined_all(client, q.from_user.id):
+        await q.message.edit("✅ Verified! Ab search karo 🔍")
     else:
-        await query.answer("❌ Join channel first!", show_alert=True)
+        await q.answer("❌ Pehle sab channels join karo", show_alert=True)
