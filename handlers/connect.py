@@ -12,3 +12,7 @@ async def connect(client, m):
         await m.reply("✅ Channel connected")
     except:
         await m.reply("❌ Use:\n/connect -100channelid or reply to a channel post")
+import sqlite3
+
+conn = sqlite3.connect("bot.db", check_same_thread=False)
+cur = conn.cursor()
