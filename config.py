@@ -1,7 +1,8 @@
-BOT_TOKEN = "YOUR_BOT_TOKEN"
+import os
 
-# Admin user IDs
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+
 ADMINS = [123456789]
-
-# Default channels (can be updated via bot)
-CHANNELS = []
