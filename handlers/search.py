@@ -1,32 +1,33 @@
 from pyrogram import Client, filters
-from utils.force_join import check_join, join_button
-from database import get_connections
+from utils.force_join import is_joined_all, join_kb
+from db import get_connections, search_files
 from utils.cache import get_cache, set_cache
 
 @Client.on_message(filters.text & filters.group)
-async def search(client, message):
-    query = message.text.lower()
+async def search(client, m):
+    q = m.text.strip().lower()
 
-    # 🔐 Force Join Check
-    if not await check_join(client, message.from_user.id):
-        return await message.reply(
-            "⚠️ Please join our channel first to use the bot",
-            reply_markup=join_button()
-        )
+    if not await is_joined_all(client, m.from_user.id):
+        return await m.reply("⚠️ Use karne ke liye join karein", reply_markup=join_kb())
 
-    # ⚡ Cache check
-    cached = get_cache(query)
-    if cached:
-        await cached.copy(message.chat.id)
-        return
+    # cache
+    c = get_cache(q)
+    if c:
+        ch, mid = c
+        return await client.copy_message(m.chat.id, ch, mid)
 
-    channels = get_connections(message.chat.id)
+    # DB search (fast)
+    rows = search_files(q, limit=5)
+    if rows:
+        ch, mid = rows[0]
+        set_cache(q, (ch, mid))
+        return await client.copy_message(m.chat.id, ch, mid)
 
-    for (channel_id,) in channels:
-        async for msg in client.search_messages(channel_id, query, limit=5):
+    # fallback: live search in connected channels
+    for (ch_id,) in get_connections(m.chat.id):
+        async for msg in client.search_messages(ch_id, q, limit=5):
             if msg.text or msg.caption or msg.media:
-                set_cache(query, msg)
-                await msg.copy(message.chat.id)
-                return
+                set_cache(q, (ch_id, msg.id))
+                return await msg.copy(m.chat.id)
 
-    await message.reply("❌ No result found")
+    await m.reply("❌ No result found")
