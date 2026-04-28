@@ -1,23 +1,14 @@
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import FORCE_JOIN
+from database import get_force_channels
 
-def channels():
-    return [c.strip().replace("@","") for c in FORCE_JOIN.split(",") if c.strip()]
+async def check_join(client, user_id):
+    channels = get_force_channels()
 
-async def is_joined_all(client, user_id):
-    for ch in channels():
+    for ch in channels:
         try:
-            m = await client.get_chat_member(ch, user_id)
-            if m.status not in ["member", "administrator", "creator"]:
+            member = await client.get_chat_member(ch, user_id)
+            if member.status not in ["member", "administrator", "creator"]:
                 return False
-        except Exception as e:
-            print("Join check error:", e)
+        except:
             return False
-    return True
 
-def join_kb():
-    btns = []
-    for ch in channels():
-        btns.append([InlineKeyboardButton(f"🔗 Join @{ch}", url=f"https://t.me/{ch}")])
-    btns.append([InlineKeyboardButton("✅ Verify", callback_data="verify_join")])
-    return InlineKeyboardMarkup(btns)
+    return True
