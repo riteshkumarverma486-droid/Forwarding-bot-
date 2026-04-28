@@ -25,3 +25,16 @@ def remove_force_channel(channel):
 def get_force_channels():
     cur.execute("SELECT channel_id FROM force_channels")
     return [i[0] for i in cur.fetchall()]
+def add_connection(user_id, group_id, channel_id):
+    cur.execute(
+        "INSERT INTO connections (user_id, group_id, channel_id) VALUES (?, ?, ?)",
+        (user_id, group_id, channel_id)
+    )
+    conn.commit()
+    cur.execute("""
+CREATE TABLE IF NOT EXISTS connections(
+    user_id INTEGER,
+    group_id INTEGER,
+    channel_id TEXT
+)
+""")
