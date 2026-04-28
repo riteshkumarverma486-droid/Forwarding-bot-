@@ -1,39 +1,17 @@
-import sqlite3
-
-conn = sqlite3.connect("bot.db", check_same_thread=False)
-cur = conn.cursor()
-
-cur.execute("""
-CREATE TABLE IF NOT EXISTS connections(
-  user_id INTEGER,
-  group_id INTEGER,
-  channel_id INTEGER
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS force_channels (
+    channel TEXT
 )
 """)
 
-cur.execute("""
-CREATE TABLE IF NOT EXISTS files(
-  channel_id INTEGER,
-  msg_id INTEGER,
-  file_name TEXT
-)
-""")
-
-def add_connection(u, g, c):
-    cur.execute("INSERT INTO connections VALUES (?,?,?)", (u, g, c))
+def add_force_channel(channel):
+    cursor.execute("INSERT INTO force_channels VALUES (?)", (channel,))
     conn.commit()
 
-def get_connections(g):
-    cur.execute("SELECT channel_id FROM connections WHERE group_id=?", (g,))
-    return cur.fetchall()
-
-def add_file(channel_id, msg_id, name):
-    cur.execute("INSERT INTO files VALUES (?,?,?)", (channel_id, msg_id, name))
+def remove_force_channel(channel):
+    cursor.execute("DELETE FROM force_channels WHERE channel=?", (channel,))
     conn.commit()
 
-def search_files(q, limit=10):
-    cur.execute(
-        "SELECT channel_id, msg_id FROM files WHERE file_name LIKE ? LIMIT ?",
-        (f"%{q}%", limit),
-    )
-    return cur.fetchall()
+def get_force_channels():
+    cursor.execute("SELECT channel FROM force_channels")
+    return [x[0] for x in cursor.fetchall()]
